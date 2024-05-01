@@ -12,5 +12,7 @@ namespace ABS3.Model
         public string Password { get; set; }
         public string Phone { get; set; }
 
+        public string role { get; set; }
+
     }
 }
