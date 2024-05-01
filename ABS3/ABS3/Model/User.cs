@@ -14,5 +14,7 @@ namespace ABS3.Model
 
         public string role { get; set; }
 
+        public ICollection<Blog> Blogs { get; set; }
+
     }
 }

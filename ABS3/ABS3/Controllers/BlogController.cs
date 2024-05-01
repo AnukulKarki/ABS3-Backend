@@ -13,7 +13,10 @@ namespace ABS3.Controllers
         [Route("GetData")]
         public string GetBlogs()
         {
-            return "Authenticated with JWt";
+            var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
+            var userName = User.Claims.FirstOrDefault(claim => claim.Type == "UserName")?.Value;
+
+            return "Authenticated with JWt" +userId;
         }
 
         [HttpGet]
