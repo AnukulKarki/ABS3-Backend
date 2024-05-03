@@ -197,6 +197,31 @@ namespace ABS3.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteComment(int id)
+        {
+            var comment = _context.Comments.Where(u => u.Id == id).ToList();
+            var commentReaction =  _context.Reactions.Where(u => u.CommentId == id).ToList();
+            var CommentHistory = _context.Histories.Where(u=> u.CommentId == id).ToList();
+            if(CommentHistory.Count > 0)
+            {
+                _context.Histories.RemoveRange(CommentHistory);
+            }
+            if (commentReaction.Count  > 0)
+            {
+                _context.Reactions.RemoveRange(commentReaction);
+            }
+            
+            
+            _context.Comments.RemoveRange(comment);
+
+            await _context.SaveChangesAsync();
+            return Ok();
+
+
+        }
+
 
     }
 }
