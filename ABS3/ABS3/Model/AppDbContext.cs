@@ -10,10 +10,16 @@ namespace ABS3.Model
 
         public DbSet<User> Users { get; set; }
         public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<CommentReaction> Reactions { get; set; }
+
+        
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
         }
+
+       
     }
 }

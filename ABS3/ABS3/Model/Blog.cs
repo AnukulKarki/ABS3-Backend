@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ABS3.Model
 {
@@ -14,11 +15,15 @@ namespace ABS3.Model
         public string CreatedOn { get; set; }
         public int Score { get; set; }
 
-        public byte[]? Image { get; set; }
+        public string Image { get; set; }
 
-        
-        public User User { get; set; }
+        public int UserId { get; set; }
 
+        [ForeignKey(nameof(UserId))]
+        public virtual User User { get; set; }
         public string Category { get; set; }
+        public int? UpVoteCount { get; set; }
+        public int? DownVoteCount {  get; set; }
+
     }
 }
