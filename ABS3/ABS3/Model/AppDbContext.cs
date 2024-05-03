@@ -13,6 +13,8 @@ namespace ABS3.Model
         public DbSet<Comment> Comments { get; set; }
         public DbSet<CommentReaction> Reactions { get; set; }
 
+        public DbSet<CommentHistory> Histories { get; set; }
+
         
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

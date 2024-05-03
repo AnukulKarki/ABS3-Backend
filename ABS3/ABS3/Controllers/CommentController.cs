@@ -86,6 +86,14 @@ namespace ABS3.Controllers
                     await _context.SaveChangesAsync();
                     return Ok();
                 }
+                if(haveLiked.IsUpVote == false )
+                {
+                    comment.UpVoteCount++;
+                    comment.Score = comment.Score+2;
+                    haveLiked.IsUpVote = true;
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
             }
             comment.UpVoteCount++;
             comment.Score = comment.Score + 2;
@@ -104,7 +112,92 @@ namespace ABS3.Controllers
 
         }
 
+        [Authorize]
+        [HttpPut("downvote/{id}")]
+        public async Task<IActionResult> DownVoteComment(int id)
+        {
+            var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
+            var comment = await _context.Comments.FindAsync(id);
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            var haveLiked = _context.Reactions.FirstOrDefault(u => u.UserId == int.Parse(userId) && u.CommentId == id);
+            if (haveLiked != null)
+            {
+                if (haveLiked.IsUpVote == true)
+                {
+                    return Unauthorized();
+                }
+                if (haveLiked.IsDownVote == true)
+                {
+                    comment.DownVoteCount--;
+                    comment.Score = comment.Score + 1;
+
+                    haveLiked.IsDownVote = false;
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
+                if (haveLiked.IsDownVote == false)
+                {
+                    comment.DownVoteCount++;
+                    comment.Score = comment.Score -1 ;
+                    haveLiked.IsDownVote = true;
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
+            }
+            comment.DownVoteCount++;
+            comment.Score = comment.Score -1 ;
+
+            var CommentReaction = new CommentReaction()
+            {
+                UserId = int.Parse(userId),
+                CommentId = id,
+                IsUpVote = false,
+                IsDownVote = true
+            };
+            _context.Reactions.Add(CommentReaction);
+            await _context.SaveChangesAsync();
+            return Ok();
+
+
+        }
+        [Authorize]
+        [HttpPut("edit/{id}")]
+        public async Task<IActionResult> EditComment(int id, CommentDto commentData)
+        {
+            var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
+            var comment = await _context.Comments.FindAsync(id);
+
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            if(comment.UserId == int.Parse(userId))
+            {
+                return Unauthorized();
+            }
+
+            comment.Text = commentData.Text;
+            comment.IsEdited = true;
+            comment.UpdatedAt = DateTime.Now.ToString();
+
+            var CommentHistory = new CommentHistory()
+            {
+                Text = commentData.Text,
+                CommentId = id,
+                UpdatedAt = DateTime.Now.ToString(),
+
+            };
+            _context.Histories.Add(CommentHistory);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
 
 
     }
 }
+
