@@ -31,16 +31,17 @@ namespace ABS3.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedOn")
-                        .IsRequired()
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("DownVoteCount")
+                    b.Property<int>("DownVoteCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Image")
-                        .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Score")
                         .HasColumnType("INTEGER");
@@ -49,8 +50,11 @@ namespace ABS3.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("UpVoteCount")
+                    b.Property<int>("UpVoteCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
@@ -62,6 +66,86 @@ namespace ABS3.Migrations
                     b.ToTable("Blogs");
                 });
 
+            modelBuilder.Entity("ABS3.Model.BlogHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BlogId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogId");
+
+                    b.ToTable("BlogHistories");
+                });
+
+            modelBuilder.Entity("ABS3.Model.BlogReaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BlogId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("IsDownVote")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("IsUpVote")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BlogReactions");
+                });
+
+            modelBuilder.Entity("ABS3.Model.Code", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Expiry")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OTP")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Codes");
+                });
+
             modelBuilder.Entity("ABS3.Model.Comment", b =>
                 {
                     b.Property<int>("Id")
@@ -71,8 +155,7 @@ namespace ABS3.Migrations
                     b.Property<int>("BlogId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("CreatedAt")
-                        .IsRequired()
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DownVoteCount")
@@ -91,7 +174,7 @@ namespace ABS3.Migrations
                     b.Property<int>("UpVoteCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")
@@ -119,8 +202,7 @@ namespace ABS3.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UpdatedAt")
-                        .IsRequired()
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -191,6 +273,47 @@ namespace ABS3.Migrations
             modelBuilder.Entity("ABS3.Model.Blog", b =>
                 {
                     b.HasOne("ABS3.Model.User", "User")
+                        .WithMany("Blogs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ABS3.Model.BlogHistory", b =>
+                {
+                    b.HasOne("ABS3.Model.Blog", "blogs")
+                        .WithMany()
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("blogs");
+                });
+
+            modelBuilder.Entity("ABS3.Model.BlogReaction", b =>
+                {
+                    b.HasOne("ABS3.Model.Blog", "blogs")
+                        .WithMany()
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ABS3.Model.User", "user")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("blogs");
+
+                    b.Navigation("user");
+                });
+
+            modelBuilder.Entity("ABS3.Model.Code", b =>
+                {
+                    b.HasOne("ABS3.Model.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -246,6 +369,11 @@ namespace ABS3.Migrations
                     b.Navigation("comment");
 
                     b.Navigation("user");
+                });
+
+            modelBuilder.Entity("ABS3.Model.User", b =>
+                {
+                    b.Navigation("Blogs");
                 });
 #pragma warning restore 612, 618
         }

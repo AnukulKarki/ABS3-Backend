@@ -15,8 +15,8 @@ namespace ABS3.Model
         [ForeignKey(nameof(BlogId))]
         public virtual Blog Blog { get; set; }
         public string Text {  get; set; }
-        public string CreatedAt {  get; set; }  
-        public string? UpdatedAt { get; set;}
+        public DateTime CreatedAt {  get; set; }  
+        public DateTime? UpdatedAt { get; set;}
         public bool IsEdited { get; set; }
         public int Score {  get; set; }
         public int UpVoteCount {  get; set; }

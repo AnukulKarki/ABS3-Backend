@@ -14,6 +14,10 @@ namespace ABS3.Model
         public DbSet<CommentReaction> Reactions { get; set; }
 
         public DbSet<CommentHistory> Histories { get; set; }
+        public DbSet<BlogReaction> BlogReactions { get; set; }
+        public DbSet<BlogHistory> BlogHistories { get; set; }
+
+        public DbSet<Code> Codes { get; set; }
 
         
 
@@ -22,6 +26,9 @@ namespace ABS3.Model
 
         }
 
-       
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

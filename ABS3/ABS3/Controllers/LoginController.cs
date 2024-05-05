@@ -65,7 +65,7 @@ namespace ABS3.Controllers
             if (user != null)
             {
                 var token = GenerateToken(user);
-                response = Ok(new {token= token});
+                response = Ok(new {token= token, role = user.role});
             }
             return response;
         }

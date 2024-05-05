@@ -28,7 +28,7 @@ namespace ABS3.Controllers
                 var comments = new Comment()
                 {
                     BlogId = comment.Blog,
-                    CreatedAt = DateTime.Now.ToString(),
+                    CreatedAt = DateTime.Now,
                     Text = comment.Text,
                     Score = 0,
                     UserId = int.Parse(userId),
@@ -162,7 +162,6 @@ namespace ABS3.Controllers
             await _context.SaveChangesAsync();
             return Ok();
 
-
         }
         [Authorize]
         [HttpPut("edit/{id}")]
@@ -183,13 +182,13 @@ namespace ABS3.Controllers
 
             comment.Text = commentData.Text;
             comment.IsEdited = true;
-            comment.UpdatedAt = DateTime.Now.ToString();
+            comment.UpdatedAt = DateTime.Now;
 
             var CommentHistory = new CommentHistory()
             {
                 Text = commentData.Text,
                 CommentId = id,
-                UpdatedAt = DateTime.Now.ToString(),
+                UpdatedAt = DateTime.Now,
 
             };
             _context.Histories.Add(CommentHistory);
@@ -218,11 +217,7 @@ namespace ABS3.Controllers
 
             await _context.SaveChangesAsync();
             return Ok();
-
-
         }
-
-
     }
 }
 

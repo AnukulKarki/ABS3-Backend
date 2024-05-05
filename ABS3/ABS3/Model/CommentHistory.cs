@@ -10,7 +10,6 @@ namespace ABS3.Model
         [ForeignKey(nameof(CommentId))]
         public Comment Comment { get; set; }
         public string Text { get; set; }
-        public string UpdatedAt { get; set; }
-
+        public DateTime UpdatedAt { get; set; }
     }
 }
