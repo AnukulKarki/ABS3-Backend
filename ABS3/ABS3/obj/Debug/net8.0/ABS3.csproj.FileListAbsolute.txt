@@ -147,3 +147,5 @@ D:\Application Development\ABS3\ABS3\bin\Debug\net8.0\Microsoft.AspNetCore.Conne
 D:\Application Development\ABS3\ABS3\bin\Debug\net8.0\Microsoft.AspNetCore.SignalR.Common.dll
 D:\Application Development\ABS3\ABS3\bin\Debug\net8.0\Microsoft.Extensions.Features.dll
 D:\Application Development\ABS3\ABS3\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+D:\Application Development\ABS3\ABS3\bin\Debug\net8.0\libman.json
+D:\Application Development\ABS3\ABS3\bin\Debug\net8.0\ABS3.staticwebassets.runtime.json

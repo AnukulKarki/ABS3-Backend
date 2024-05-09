@@ -14,11 +14,13 @@ namespace ABS3.Controllers
     [ApiController]
     public class UserController: ControllerBase
     {
+        private readonly IWebHostEnvironment _environment;
         private readonly AppDbContext _context;
 
-        public UserController(AppDbContext context)
+        public UserController(AppDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         [HttpGet]
@@ -58,8 +60,8 @@ namespace ABS3.Controllers
             {
                 return BadRequest("File size exceeds the limit of 3MB.");
             }
-
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads/users");
+            string webrootpath = _environment.WebRootPath; 
+            string uploadsFolder = Path.Combine(webrootpath, "uploads/users");
 
             if (!Directory.Exists(uploadsFolder))
             {
@@ -92,30 +94,20 @@ namespace ABS3.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpPut]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<IActionResult> PutUser( string email, string phone, string name)
         {
-            if (id != user.Id)
+            var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
+            var userData = _context.Users.FirstOrDefault(u=> u.Id == int.Parse(userId));
+            if(userData == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            _context.Entry(user).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserAvailable(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            userData.Name = name;
+            userData.Phone = phone;
+            userData.Email = email;
+            await _context.SaveChangesAsync();
             return Ok();
         }
 

@@ -321,7 +321,8 @@ namespace ABS3.Controllers
 
             if (blogDto.BlogImage != null && blogDto.BlogImage.Length > 0)
             {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                string webrootpath = _environment.WebRootPath;
+                string uploadsFolder = Path.Combine(webrootpath, "uploads/blogs");
 
                 if (!Directory.Exists(uploadsFolder))
                 {
@@ -394,8 +395,8 @@ namespace ABS3.Controllers
             {
                 return BadRequest("Title, content, or category is missing.");
             }
-
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            string webrootpath = _environment.WebRootPath;
+            string uploadsFolder = Path.Combine(webrootpath, "uploads/blogs");
 
             if (!Directory.Exists(uploadsFolder))
             {
