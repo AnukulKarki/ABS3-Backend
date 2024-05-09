@@ -22,7 +22,7 @@ namespace ABS3.Controllers
             _context = context;
             _environment = environment;
         }
-
+        //this method is used to get the data of all the users.
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
@@ -32,7 +32,7 @@ namespace ABS3.Controllers
             }
             return await _context.Users.ToListAsync();
         }
-
+        //this method is used to get the user by their id
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserId(int id)
         {
@@ -48,7 +48,7 @@ namespace ABS3.Controllers
 
             return user;
         }
-
+        //this method is used to register the user in the app
         [HttpPost("Register")]
         public async Task<ActionResult<User>> PostUser([FromForm] UserDto user)
         {
@@ -93,7 +93,7 @@ namespace ABS3.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
+        //this method is  used to edit the users details
         [Authorize]
         [HttpPut]
         public async Task<IActionResult> PutUser( string email, string phone, string name)
@@ -115,7 +115,7 @@ namespace ABS3.Controllers
         {
             return (_context.Users?.Any(x => x.Id == id)).GetValueOrDefault();
         }
-
+        //this method is used to delete the user
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -133,6 +133,7 @@ namespace ABS3.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+        //this method us sued to change the password
         [Authorize]
         [HttpPut("UserProfilePassword")]
         public async Task<ActionResult> ChangePassword(string currentPassword, string newPassword)
@@ -157,7 +158,7 @@ namespace ABS3.Controllers
 
             
         }
-
+        //this method is used to deltet the profile
         [Authorize]
         [HttpDelete("DeleteProfile")]
         public async Task<ActionResult> DeleteProfile()
@@ -194,7 +195,8 @@ namespace ABS3.Controllers
                 _context.BlogReactions.RemoveRange(blogReaction);
             }
             _context.Blogs.RemoveRange(blog);
-            _context.SaveChangesAsync();
+            _context.Users.Remove(user);
+             _context.SaveChangesAsync();
             return Ok("User deleted successfully");
 
 
@@ -210,7 +212,7 @@ namespace ABS3.Controllers
             }
             return -1;
         }
-
+        //this method is used to get the current user
         [HttpGet("GetCurrentUser")]
         [Authorize]
         public async Task<ActionResult<User>> GetCurrentUser()
@@ -229,6 +231,8 @@ namespace ABS3.Controllers
 
             return user;
         }
+
+        
 
 
     }

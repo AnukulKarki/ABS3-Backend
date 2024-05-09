@@ -20,7 +20,7 @@ namespace ABS3.Controllers
         {
             _context = context;
         }
-
+        //this method is used to send a email
         [HttpPost]
         public async Task<ActionResult> sendEmail(string email)
         {
@@ -49,6 +49,7 @@ namespace ABS3.Controllers
             var result = mail.Email(user.Email, otp);
             return Ok();
         }
+        //this method is used to validate the code of a user.
         [HttpPost("CodeValidate")]
         public async Task<ActionResult> CodeValidation(int code, string email)
         {
@@ -72,6 +73,7 @@ namespace ABS3.Controllers
 
 
         }
+        //this method is used to change the password
         [HttpPut("password")]
         public async Task<ActionResult> PasswordChange( string email, string password)
         {

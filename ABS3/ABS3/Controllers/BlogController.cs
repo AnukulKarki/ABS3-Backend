@@ -20,7 +20,7 @@ namespace ABS3.Controllers
             _context = context;
             _environment = environment;
         }
-
+        //This method is used to get all the blogs
         [HttpGet]
         [Route("GetBlogs")]
         public async Task<ActionResult<IEnumerable<BlogDisplayDTO>>> GetBlogs()
@@ -49,7 +49,7 @@ namespace ABS3.Controllers
 
             return Ok(blogDtos);
         }
-
+        //this method is used to get the blogs details using id
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<Blog>>> GetBlogsId(int id)
         {
@@ -154,6 +154,7 @@ namespace ABS3.Controllers
 
           }
   */
+        //method is used to upvote the blog
         [Authorize]
         [HttpPut("upvote/{id}")]
         public async Task<IActionResult> BlogUpvote(int id)
@@ -171,7 +172,7 @@ namespace ABS3.Controllers
             {
                 if (haveLiked.IsDownVote == true)
                 {
-                    return Unauthorized();
+                    return BadRequest();
                 }
                 if (haveLiked.IsUpVote == true)
                 {
@@ -217,7 +218,7 @@ namespace ABS3.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
+        //this method is used to downvote blog
         [Authorize]
         [HttpPut("downvote/{id}")]
         public async Task<IActionResult> DownVoteBlog(int id)
@@ -235,7 +236,7 @@ namespace ABS3.Controllers
             {
                 if (haveLiked.IsUpVote == true)
                 {
-                    return Unauthorized();
+                    return BadRequest();
                 }
                 if (haveLiked.IsDownVote == true)
                 {
@@ -283,7 +284,7 @@ namespace ABS3.Controllers
 
 
         }
-
+        //this method is used to edit the blogs
         [Authorize]
         [HttpPut("edit/{id}")]
         public async Task<IActionResult> EditBlogs(int id, [FromForm] BlogDto blogDto)
@@ -346,7 +347,7 @@ namespace ABS3.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
+        //this method is used to delete the blogs
         [Authorize]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteBlogs(int id)
@@ -378,7 +379,8 @@ namespace ABS3.Controllers
 
 
         }
-
+        //this method is used to upload the blog by the users
+        [Authorize]
         [HttpPost]
         [Route("UploadBlog")]
         public async Task<IActionResult> BlogUpload([FromForm] BlogDto model)
@@ -387,6 +389,7 @@ namespace ABS3.Controllers
             {
                 return BadRequest("No file was uploaded.");
             }
+            //it is used to limit the file size of 3 mb
             if (model.BlogImage.Length > 3 * 1024 * 1024)
             {
                 return BadRequest("File size exceeds the limit of 3MB.");
@@ -395,14 +398,15 @@ namespace ABS3.Controllers
             {
                 return BadRequest("Title, content, or category is missing.");
             }
+            //creating a path for uploading a file
             string webrootpath = _environment.WebRootPath;
             string uploadsFolder = Path.Combine(webrootpath, "uploads/blogs");
-
+            //create a folder to sore the file
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
             }
-
+            //creating a unique file name
             string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.BlogImage.FileName);
             string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -434,6 +438,7 @@ namespace ABS3.Controllers
 
             return Ok("File uploaded successfully.");
         }
+        //this method is used to get the blogs of the user who are logged in
         [HttpGet]
         [Route("GetUserBlogs")]
         [Authorize]
@@ -474,6 +479,132 @@ namespace ABS3.Controllers
             });
 
             return Ok(blogDtos);
+        }
+        //this is used to filter the recency of the blogs
+        [HttpGet]
+        [Route("BlogsRecency")]
+        public async Task<ActionResult<IEnumerable<Blog>>> BlogsRecency()
+        {
+            var recentBlogs = await _context.Blogs
+                .Include(b => b.User)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+
+            if (recentBlogs == null || recentBlogs.Count == 0)
+            {
+                return NotFound();
+            }
+            var blogDtos = recentBlogs.Select(blog => new BlogDisplayDTO
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Content = blog.Content,
+                Score = blog.Score,
+                ImagePath = blog.ImagePath,
+                UserId = blog.UserId,
+                UserName = blog.User.Name,
+                Category = blog.Category,
+                CreatedAt = blog.CreatedAt,
+                UpdatedAt = blog.UpdatedAt,
+                IsEdited = blog.IsEdited,
+                UpVoteCount = blog.UpVoteCount,
+                DownVoteCount = blog.DownVoteCount
+            });
+            return Ok(blogDtos);
+        }
+        //thos is used to filter the popular blogs
+        [HttpGet]
+        [Route("BlogsPopular")]
+        public async Task<ActionResult<IEnumerable<Blog>>> PopularBlogs()
+        {
+            var popularBlogs = await _context.Blogs
+                .Include(b => b.User)
+                .OrderByDescending(b => b.Score)
+                .Take(10)
+                .ToListAsync();
+
+            var blogDtos = popularBlogs.Select(blog => new BlogDisplayDTO
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Content = blog.Content,
+                Score = blog.Score,
+                ImagePath = blog.ImagePath,
+                UserId = blog.UserId,
+                UserName = blog.User.Name,
+                Category = blog.Category,
+                CreatedAt = blog.CreatedAt,
+                UpdatedAt = blog.UpdatedAt,
+                IsEdited = blog.IsEdited,
+                UpVoteCount = blog.UpVoteCount,
+                DownVoteCount = blog.DownVoteCount
+            });
+            return Ok(blogDtos);
+        }
+        //this is used to filter the oldest blogs
+        [HttpGet]
+        [Route("OldestBlogs")]
+        public async Task<ActionResult<IEnumerable<Blog>>> OldestBlogs()
+        {
+            var oldestBlogs = await _context.Blogs
+                .Include(b => b.User)
+                .OrderBy(b => b.CreatedAt)
+                .ToListAsync();
+
+            var blogDtos = oldestBlogs.Select(blog => new BlogDisplayDTO
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Content = blog.Content,
+                Score = blog.Score,
+                ImagePath = blog.ImagePath,
+                UserId = blog.UserId,
+                UserName = blog.User.Name,
+                Category = blog.Category,
+                CreatedAt = blog.CreatedAt,
+                UpdatedAt = blog.UpdatedAt,
+                IsEdited = blog.IsEdited,
+                UpVoteCount = blog.UpVoteCount,
+                DownVoteCount = blog.DownVoteCount
+            });
+
+            return Ok(blogDtos);
+        }
+        //this is used to get the randon blogs
+        [HttpGet]
+        [Route("RandomBlogs")]
+        public async Task<ActionResult<IEnumerable<Blog>>> RandomBlogs()
+        {
+            var allBlogs = await _context.Blogs.Include(b => b.User).ToListAsync();
+            var random = new Random();
+            var shuffledBlogs = allBlogs.OrderBy(b => random.Next()).ToList();
+            var blogDtos = shuffledBlogs.Select(blog => new BlogDisplayDTO
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Content = blog.Content,
+                Score = blog.Score,
+                ImagePath = blog.ImagePath,
+                UserId = blog.UserId,
+                UserName = blog.User.Name,
+                Category = blog.Category,
+                CreatedAt = blog.CreatedAt,
+                UpdatedAt = blog.UpdatedAt,
+                IsEdited = blog.IsEdited,
+                UpVoteCount = blog.UpVoteCount,
+                DownVoteCount = blog.DownVoteCount
+            });
+
+
+            return Ok(blogDtos);
+
+        }
+        [HttpGet("blogedithistory")]
+        public async Task<ActionResult<IEnumerable<BlogHistory>>> editHistory(int id)
+        {
+            var blogHistory = await _context.BlogHistories.Where(u => u.BlogId== id).ToListAsync();
+            return blogHistory;
+
         }
 
 

@@ -18,7 +18,7 @@ namespace ABS3.Controllers
         {
             _context = context;
         }
-
+        //This method is used to count the number of blogs
         [Authorize]
         [HttpGet("Blog")]
         public async Task<int> GetBlogCount()
@@ -26,7 +26,7 @@ namespace ABS3.Controllers
             return await _context.Blogs.CountAsync();
 
         }
-        
+        //This method is used to get the blog count of a certain month
         [HttpGet("BlogMonth")]
         public async Task<int> GetBlogCountMonth(int id)
         {
@@ -34,7 +34,7 @@ namespace ABS3.Controllers
                 
             
         }
-
+        //This method is used to get the blogupvote count
         [Authorize]
         [HttpGet("GetBlogUpVote")]
         public async Task<int> GetBlogUpvote()
@@ -42,7 +42,7 @@ namespace ABS3.Controllers
             return await _context.Blogs.SumAsync(a => a.UpVoteCount );
 
         }
-
+        //this method is used to get the upvote count of a certain month
         
         [HttpGet("GetBlogUpVoteMonth")]
         public async Task<int> GetBlogUpvoteMonth(int month)
@@ -53,14 +53,14 @@ namespace ABS3.Controllers
 
 
         }
-
+        //this method is used to get the downvote count of all time
         [Authorize]
         [HttpGet("GetBlogDownVote")]
         public async Task<int> GetBlogDownvote()
         {
             return await _context.Blogs.SumAsync(a => a.DownVoteCount);
         }
-
+        //this method is used to get the downvote of a certain month
         [Authorize]
         [HttpGet("GetBlogDownVoteMonth")]
         public async Task<int> GetBlogDownvoteMonth(int month)
@@ -70,20 +70,20 @@ namespace ABS3.Controllers
             var BlogReaction = await _context.BlogReactions.Where(a => a.IsDownVote == true && a.CreatedAt.Month == month).CountAsync();
             return commentReaction + BlogReaction;
         }
-
+        //this method is used to get the count of comment of all time
         [Authorize]
         [HttpGet("GetCommentCount")]
         public async Task<int> GetCommentCount()
         {
             return await _context.Comments.CountAsync();
         }
-
+        //this method is used to get the comment of a cetain month
         [HttpGet("GetCommentCountMonth")]
         public async Task<int> GetCommentCountMonth(int month)
         {
             return await _context.Comments.Where(a => a.CreatedAt.Month == month).CountAsync();
         }
-
+        //this method is used to get the top blogs of all time
         [HttpGet("TopBlog")]
         public async Task<ActionResult<IEnumerable<Blog>>> GetTopBlog()
         {
@@ -100,7 +100,7 @@ namespace ABS3.Controllers
             return Ok(topBlogs);
         }
 
-
+        //this method is used to get the top blog of a ceratain month
         [HttpGet("TopBlogMonth")]
         public async Task<ActionResult<IEnumerable<Blog>>> GetTopBlog(int month)
         {
@@ -117,7 +117,7 @@ namespace ABS3.Controllers
             }
             return Ok(topBlogs);
         }
-
+        //this method us used to get the top user of all time
         [HttpGet("TopUser")]
         public async Task<ActionResult<IEnumerable<User>>> GetTopUser()
         {
@@ -140,6 +140,7 @@ namespace ABS3.Controllers
             }
             return Ok(topUsers);
         }
+        //This method is used to get the top user of a ceratain months
         [HttpGet("TopUserMonth")]
         public async Task<ActionResult<IEnumerable<User>>> GetTopUserMonth(int month)
         {
@@ -162,6 +163,7 @@ namespace ABS3.Controllers
             }
             return Ok(topUsers);
         }
+        //this method is used to add aadmin
         [HttpPut("RoleUpdate")]
         public async Task<bool> AddAdmin(string email)
         {

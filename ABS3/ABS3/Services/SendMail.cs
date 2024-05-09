@@ -8,10 +8,11 @@ namespace ABS3.Services
 {
     public class SendMail
     {
+        //this method is used to send the email
         public bool Email(string email, int otp)
         {
-            string sendMail = "anukulkarki11@gmail.com";
-            string password = "tdsi vipn msau kqth";
+            string sendMail = "asb3blog@gmail.com";
+            string password = "snsd yicz ohyn pgld";
             var data = otp.ToString();
             MailMessage message = new MailMessage();
             message.From = new MailAddress(sendMail);

@@ -32,7 +32,7 @@ namespace ABS3.Controllers
         }
 
 
-
+        //a method to generate the token for the user
         private string GenerateToken(User user)
         {
             var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -57,7 +57,7 @@ namespace ABS3.Controllers
 
 
         }
-
+        //method to create a login token using a api end point
         [AllowAnonymous]
         [HttpPost]
         public IActionResult Login(LoginDto login)
@@ -67,7 +67,7 @@ namespace ABS3.Controllers
             if (user != null)
             {
                 var token = GenerateToken(user);
-                response = Ok(new {token= token, role = user.role});
+                response = Ok(new {token= token, role = user.role, id=user.Id});
             }
             return response;
         }

@@ -20,7 +20,7 @@ namespace ABS3.Controllers
         {
             _context = context;
         }
-
+        //this method is used to post a comment
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post(CommentDto comment) {
@@ -61,7 +61,7 @@ namespace ABS3.Controllers
         
         }
 
-
+        //this method is sued to get the comments
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<Comment>>> GetComment(int id)
         {
@@ -72,6 +72,7 @@ namespace ABS3.Controllers
             }
             return comment;
         }
+        //this method is used to upvote the comments
         [Authorize]
         [HttpPut("upvote/{id}")]
         public async Task<IActionResult> UpVoteComment(int id)
@@ -88,7 +89,7 @@ namespace ABS3.Controllers
             {
                 if (haveLiked.IsDownVote == true)
                 {
-                    return Unauthorized();
+                    return BadRequest();
                 }
                 if(haveLiked.IsUpVote == true)
                 {
@@ -125,7 +126,7 @@ namespace ABS3.Controllers
             
 
         }
-
+        //this method is used to downvite the comments
         [Authorize]
         [HttpPut("downvote/{id}")]
         public async Task<IActionResult> DownVoteComment(int id)
@@ -142,7 +143,7 @@ namespace ABS3.Controllers
             {
                 if (haveLiked.IsUpVote == true)
                 {
-                    return Unauthorized();
+                    return BadRequest();
                 }
                 if (haveLiked.IsDownVote == true)
                 {
@@ -178,9 +179,10 @@ namespace ABS3.Controllers
             return Ok();
 
         }
+        //this method ius used to edit the comment
         [Authorize]
         [HttpPut("edit/{id}")]
-        public async Task<IActionResult> EditComment(int id, CommentDto commentData)
+        public async Task<IActionResult> EditComment(int id, string commentData)
         {
             var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
             var comment = await _context.Comments.FindAsync(id);
@@ -190,10 +192,6 @@ namespace ABS3.Controllers
                 return NotFound();
             }
 
-            if(comment.UserId == int.Parse(userId))
-            {
-                return Unauthorized();
-            }
 
             
 
@@ -205,7 +203,7 @@ namespace ABS3.Controllers
 
             };
 
-            comment.Text = commentData.Text;
+            comment.Text = commentData;
             comment.IsEdited = true;
             comment.UpdatedAt = DateTime.Now;
 
@@ -213,7 +211,7 @@ namespace ABS3.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
+        //this method is used to delete thec comment
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
@@ -235,6 +233,14 @@ namespace ABS3.Controllers
 
             await _context.SaveChangesAsync();
             return Ok();
+        }
+        //this method is used to get thec ocmment edit history.
+        [HttpGet("commentedithistory")]
+        public async Task<ActionResult<IEnumerable<CommentHistory>>> commentHistory(int id)
+        {
+            var commentHistory = await _context.Histories.Where(u => u.CommentId == id).ToListAsync();
+            return commentHistory;
+
         }
     }
 }
