@@ -53,10 +53,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<NotificationHub>("/notification");
-});
+
 app.UseCors("_myAllowSpecificOrigins");
 
 app.UseAuthentication();

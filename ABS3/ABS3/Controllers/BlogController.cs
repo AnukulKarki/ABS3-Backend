@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Web.Http.Controllers;
 
 namespace ABS3.Controllers
 {
@@ -203,6 +204,7 @@ namespace ABS3.Controllers
         public async Task<IActionResult> DownVoteBlog(int id)
         {
             var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
+            var userName = User.Claims.FirstOrDefault(claim => claim.Type == "UserName")?.Value;
             var blog = await _context.Blogs.FindAsync(id);
             if (blog == null)
             {
@@ -244,6 +246,17 @@ namespace ABS3.Controllers
                 IsUpVote = false,
                 IsDownVote = true
             };
+
+            var notification = new Notification()
+            {
+                UserId = blog.UserId,
+                NotificationMsg = userName + " has Disliked on your blog.",
+                CreatedOn = DateTime.Now,
+                IsViewed = false
+            };
+            _context.Notifications.Add(notification);
+
+
             _context.BlogReactions.Add(BlogReaction);
             await _context.SaveChangesAsync();
             return Ok();
@@ -253,7 +266,7 @@ namespace ABS3.Controllers
 
         [Authorize]
         [HttpPut("edit/{id}")]
-        public async Task<IActionResult> EditBlogs(int id, BlogDto blogDto)
+        public async Task<IActionResult> EditBlogs(int id, [FromForm] BlogDto blogDto)
         {
             var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
             var blog = await _context.Blogs.FindAsync(id);
@@ -263,10 +276,22 @@ namespace ABS3.Controllers
                 return NotFound();
             }
 
-            if (blog.UserId == int.Parse(userId))
+            if (blog.UserId != int.Parse(userId))
             {
                 return Unauthorized();
             }
+            if (blogDto.BlogImage.Length > 3 * 1024 * 1024)
+            {
+                return BadRequest("File size exceeds the limit of 3MB.");
+            }
+            var BlogHistory = new BlogHistory()
+            {
+                Title = blog.Title,
+                Content = blog.Content,
+                Category = blog.Category,
+                BlogId = id,
+                UpdatedAt = DateTime.Now
+            };
 
             blog.Title = blogDto.Title;
             blog.Content = blogDto.Content;
@@ -274,14 +299,28 @@ namespace ABS3.Controllers
             blog.IsEdited = true;
             blog.UpdatedAt = DateTime.Now;
 
-            var BlogHistory = new BlogHistory()
+            if (blogDto.BlogImage != null && blogDto.BlogImage.Length > 0)
             {
-                Title = blogDto.Title,
-                Content = blogDto.Content,
-                Category = blogDto.Category,
-                BlogId = id,
-                UpdatedAt = DateTime.Now
-            };
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(blogDto.BlogImage.FileName);
+
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await blogDto.BlogImage.CopyToAsync(fileStream);
+                }
+
+                blog.ImagePath = filePath;
+            }
+
+            
             _context.BlogHistories.Add(BlogHistory);
             await _context.SaveChangesAsync();
             return Ok();
@@ -294,6 +333,14 @@ namespace ABS3.Controllers
             var blog = _context.Blogs.Where(u => u.Id == id).ToList();
             var blogReaction = _context.BlogReactions.Where(u => u.BlogId == id).ToList();
             var blogHistory = _context.BlogHistories.Where(u => u.BlogId == id).ToList();
+            var comment = _context.Comments.Where(u => u.BlogId == id).ToList();
+            foreach (Comment c in comment)
+            {
+                var commentHistory = _context.Histories.Where(a=> a.CommentId == c.Id).ToList();
+                _context.Histories.RemoveRange(commentHistory);
+                var commentReaction = _context.Reactions.Where(a => a.CommentId == c.Id).ToList();
+                _context.Reactions.RemoveRange(commentReaction);
+            }
             if (blogHistory.Count > 0)
             {
                 _context.BlogHistories.RemoveRange(blogHistory);
@@ -319,7 +366,10 @@ namespace ABS3.Controllers
             {
                 return BadRequest("No file was uploaded.");
             }
-
+            if (model.BlogImage.Length > 3 * 1024 * 1024)
+            {
+                return BadRequest("File size exceeds the limit of 3MB.");
+            }
             if (string.IsNullOrEmpty(model.Title) || string.IsNullOrEmpty(model.Content) || string.IsNullOrEmpty(model.Category))
             {
                 return BadRequest("Title, content, or category is missing.");
@@ -356,22 +406,14 @@ namespace ABS3.Controllers
                 CreatedAt = DateTime.Now
             };
             
-
-
             _context.Blogs.Add(blog);
             
-            var blogHistory = new BlogHistory
-            {
-                BlogId = blog.Id,
-                Title = model.Title,
-                Content = model.Content,
-                Category = model.Category,
-                UpdatedAt = DateTime.Now,
-            };
-            _context.BlogHistories.Add(blogHistory);
+            
             await _context.SaveChangesAsync();
 
             return Ok("File uploaded successfully.");
         }
+
+
     }
 }

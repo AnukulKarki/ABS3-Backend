@@ -143,6 +143,49 @@ namespace ABS3.Controllers
             
         }
 
+        [Authorize]
+        [HttpDelete("DeleteProfile")]
+        public async Task<ActionResult> DeleteProfile()
+        {
+
+            var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
+            var userID = int.Parse(userId);
+            var user = _context.Users.FirstOrDefault(u => u.Id == userID);
+            var notification =_context.Notifications.Where(u => u.UserId == userID).ToList();
+            _context.Notifications.RemoveRange(notification);
+            var blog = _context.Blogs.Where(u => u.UserId == userID).ToList();
+
+            foreach (Blog b in blog)
+            {
+                var blogReaction = _context.BlogReactions.Where(u => u.BlogId == b.Id).ToList();
+                var blogHistory = _context.BlogHistories.Where(u => u.BlogId == b.Id).ToList();
+                var comment = _context.Comments.Where(u => u.BlogId == b.Id).ToList();
+                foreach (Comment c in comment)
+                {
+                    var commentHistory = _context.Histories.Where(a => a.CommentId == c.Id).ToList();
+                    _context.Histories.RemoveRange(commentHistory);
+                    var commentReaction = _context.Reactions.Where(a => a.CommentId == c.Id).ToList();
+                    _context.Reactions.RemoveRange(commentReaction);
+                }
+                if (blogHistory.Count > 0)
+                {
+                    _context.BlogHistories.RemoveRange(blogHistory);
+                }
+                if (blogReaction.Count > 0)
+                {
+                    _context.BlogReactions.RemoveRange(blogReaction);
+                }
+                _context.BlogHistories.RemoveRange(blogHistory);
+                _context.BlogReactions.RemoveRange(blogReaction);
+            }
+            _context.Blogs.RemoveRange(blog);
+            _context.SaveChangesAsync();
+            return Ok("User deleted successfully");
+
+
+
+        }
+
 
     }
 }

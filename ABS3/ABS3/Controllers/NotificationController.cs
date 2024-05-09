@@ -36,14 +36,26 @@ namespace ABS3.Controllers
         }
 
         [Authorize]
-        [Microsoft.AspNetCore.Mvc.HttpPut("User")]
+        [Microsoft.AspNetCore.Mvc.HttpPut("UserView")]
         public async Task<bool> NotificationView(int id)
         {
             var noti = _context.Notifications.FirstOrDefault(u => u.Id == id);
             noti.IsViewed = true;
             await _context.SaveChangesAsync();
             return true;
-            
+        }
+        [Authorize]
+        [Microsoft.AspNetCore.Mvc.HttpPut("ViewAll")]
+        public async Task<bool> NotificationAllView(int id)
+        {
+            var userId = User.Claims.FirstOrDefault(claim => claim.Type == "UserId")?.Value;
+            var noti = _context.Notifications.Where(u => u.UserId == int.Parse(userId)).ToList();
+            foreach (Notification notification in noti)
+            {
+                notification.IsViewed = true;
+            }
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
