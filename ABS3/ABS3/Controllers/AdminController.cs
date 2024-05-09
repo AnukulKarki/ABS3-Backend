@@ -47,7 +47,9 @@ namespace ABS3.Controllers
         [HttpGet("GetBlogUpVoteMonth")]
         public async Task<int> GetBlogUpvoteMonth(int month)
         {
-            return await _context.Blogs.Where(a=> a.CreatedAt.Month == month).SumAsync(a => a.UpVoteCount);
+            var commentReaction = await _context.Reactions.Where(a => a.IsUpVote == true && a.CreatedAt.Month == month).CountAsync();
+            var BlogReaction = await _context.BlogReactions.Where(a => a.IsUpVote == true && a.CreatedAt.Month == month).CountAsync();
+            return commentReaction + BlogReaction;
 
 
         }
@@ -63,7 +65,10 @@ namespace ABS3.Controllers
         [HttpGet("GetBlogDownVoteMonth")]
         public async Task<int> GetBlogDownvoteMonth(int month)
         {
-            return await _context.Blogs.Where(a => a.CreatedAt.Month == month).SumAsync(a => a.DownVoteCount);
+            //return await _context.Blogs.Where(a => a.CreatedAt.Month == month).SumAsync(a => a.DownVoteCount);
+            var commentReaction =  await _context.Reactions.Where(a=> a.IsDownVote == true  && a.CreatedAt.Month == month).CountAsync();
+            var BlogReaction = await _context.BlogReactions.Where(a => a.IsDownVote == true && a.CreatedAt.Month == month).CountAsync();
+            return commentReaction + BlogReaction;
         }
 
         [Authorize]
@@ -165,7 +170,7 @@ namespace ABS3.Controllers
             {
                 return false;
             }
-            user.role = "admin";
+            user.role = "Admin";
             await _context.SaveChangesAsync();
             return true;
         }

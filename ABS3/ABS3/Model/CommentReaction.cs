@@ -17,6 +17,7 @@ namespace ABS3.Model
 
         public bool? IsUpVote { get; set; }
         public bool? IsDownVote { get; set; }
+        public DateTime CreatedAt {  get; set; }
 
         
 

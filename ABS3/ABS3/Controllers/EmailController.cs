@@ -21,7 +21,7 @@ namespace ABS3.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<ActionResult> sendEmail(string email)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == email );

@@ -116,7 +116,8 @@ namespace ABS3.Controllers
                 UserId = int.Parse(userId),
                 CommentId = id,
                 IsUpVote = true,
-                IsDownVote = false
+                IsDownVote = false,
+                CreatedAt = DateTime.Now
             };
             _context.Reactions.Add(CommentReaction);
             await _context.SaveChangesAsync();
@@ -169,7 +170,8 @@ namespace ABS3.Controllers
                 UserId = int.Parse(userId),
                 CommentId = id,
                 IsUpVote = false,
-                IsDownVote = true
+                IsDownVote = true,
+                CreatedAt = DateTime.Now
             };
             _context.Reactions.Add(CommentReaction);
             await _context.SaveChangesAsync();

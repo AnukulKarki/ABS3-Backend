@@ -53,12 +53,30 @@ namespace ABS3.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<Blog>>> GetBlogsId(int id)
         {
-            var blog = _context.Blogs.Where(u => u.Id == id).Include(c => c.User).ToList();
-            if (blog.Count == 0)
+            var blogs = await _context.Blogs.
+                Where(c=> c.Id == id)
+       .Include(b => b.User) // Include the User navigation property
+       .ToListAsync();
+
+
+            var blogDtos = blogs.Select(blog => new BlogDisplayDTO
             {
-                return NotFound();
-            }
-            return blog;
+                Id = blog.Id,
+                Title = blog.Title,
+                Content = blog.Content,
+                Score = blog.Score,
+                ImagePath = blog.ImagePath,
+                UserId = blog.UserId,
+                UserName = blog.User.Name, // Assuming User has a Name property
+                Category = blog.Category,
+                CreatedAt = blog.CreatedAt,
+                UpdatedAt = blog.UpdatedAt,
+                IsEdited = blog.IsEdited,
+                UpVoteCount = blog.UpVoteCount,
+                DownVoteCount = blog.DownVoteCount
+            });
+
+            return Ok(blogDtos);
 
         }
 
@@ -181,7 +199,8 @@ namespace ABS3.Controllers
                 UserId = int.Parse(userId),
                 BlogId = id,
                 IsUpVote = true,
-                IsDownVote = false
+                IsDownVote = false,
+                CreatedAt = DateTime.Now
             };
 
             var notification = new Notification()
@@ -244,7 +263,8 @@ namespace ABS3.Controllers
                 UserId = int.Parse(userId),
                 BlogId = id,
                 IsUpVote = false,
-                IsDownVote = true
+                IsDownVote = true,
+                CreatedAt = DateTime.Now,
             };
 
             var notification = new Notification()
@@ -412,6 +432,47 @@ namespace ABS3.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("File uploaded successfully.");
+        }
+        [HttpGet]
+        [Route("GetUserBlogs")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<BlogDisplayDTO>>> GetUserBlogs()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(claim => claim.Type == "UserId");
+
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                return BadRequest("User ID claim not found.");
+            }
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return BadRequest("Invalid user ID format.");
+            }
+
+            var blogs = await _context.Blogs
+                .Include(b => b.User)
+                .Where(b => b.UserId == userId)
+                .ToListAsync();
+
+            var blogDtos = blogs.Select(blog => new BlogDisplayDTO
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Content = blog.Content,
+                Score = blog.Score,
+                ImagePath = blog.ImagePath,
+                UserId = blog.UserId,
+                UserName = blog.User.Name,
+                Category = blog.Category,
+                CreatedAt = blog.CreatedAt,
+                UpdatedAt = blog.UpdatedAt,
+                IsEdited = blog.IsEdited,
+                UpVoteCount = blog.UpVoteCount,
+                DownVoteCount = blog.DownVoteCount
+            });
+
+            return Ok(blogDtos);
         }
 
 
